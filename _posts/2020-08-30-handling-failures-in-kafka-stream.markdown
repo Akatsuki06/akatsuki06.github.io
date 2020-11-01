@@ -1,20 +1,19 @@
 ---
 layout: post
-title:  Stateful streaming to analyse market sentiment
-date:   2020-09-20 12:01:56 +0530
+title:  Handling failures in Kafka streams
+date:   2020-08-30 15:10:56 +0900
 categories: kafka stream microservice
 ---
 
-Notion of a state in a stream processing may sound odd as most of the stream processing would only need continuos flow of discrete events but sometimes we may require to extract some meaningful insights from the flowing data in a time bound frame.
+For a stream to be stable, resilient and reliable it is important that it handle failures gracefully. 
+ Kafka streams failures are largely centered around the exceptions that occur during **deserialization** and  exceptions that occur during **interaction with broker**.
 
-> A perfect example is a stock market prices keep fluctuating, so in a 10 minute of time frame the prices go up and down multiple times, we can use prices of last 10 minutes to whether a stock is overbought or oversold! If a particular stock be overbought, implies that its a good candidate to be sold hence the market will pullback in near future. Market sentiment is price driven and time bound. Hence we will collect all prices in a time frame using kafka stream and will store the prices in state store, the market sentiment will be evaluated for the period and published to other topic from where it can be used by other applications.
+In this article I will explain how we can handle the fatal errors in kafka stream and avoid the application to shutdown unexpectedly.
 
 
+## The failures
 
-## Topology
-
-![Image](https://user-images.githubusercontent.com/16136908/93705864-9dab1300-fb3e-11ea-9ede-8e6342ea4038.jpg)
-
+The data in a source topic of stream can have corrupt records for instance there can be records that doesn't follow the schema causing error on deserialization or there can be oversized records exceeding the `max.message.bytes` set for the topic its writing to, any occurence of such data can halt the stream and can cause serious disruption in the service as well data loss if not handled properly. 
 
 ### Deserialization exception
 While consuming if a record doesn't follow the desired schema, it will throw deserialization exception, to handle it we setup a custom `DeserializationExceptionHandler`,  the defected record can be simply logged somewhere and the stream can continue without failing. 
@@ -72,16 +71,16 @@ streamConfig.put("default.production.exception.handler", CustomProductionExcepti
 ```
 
 
-### Other Runtime Failures
+### Other exceptions
 
-Apart from the above scenarios we can have Runtime failures like `IndexOutOfBoundsException` which comes up due to the processor-logic/data-issue or [`NoHostAvailableException`] [exception] which occurs while interacting with a database or a third party service.
+Apart from the above scenarios we may have failures happening inside of the processor code as an example exceptions occuring on database calls.
 
 These can be handled by simply using a try-catch in the processor code: 
 ```java 
 try {  
     // code 
 }  
-catch (NoHostAvailableException e){  
+catch (AnyException e){  
   //handle, retry, notify..
 }
 ```
@@ -89,7 +88,7 @@ All the failed records can be forwarded to some other topic for further analysis
 
 ### When no option is left!
 
-Sometimes we are  left with NO option if any uncaught exception occurs, all we can do is wait for the stream thread to die, but before it completely die we would trigger some code to notify that something wrong has occured in the stream. 
+Sometimes we are  left with NO option if any uncaught exception occurs, all we can do is wait for the stream thread to die, but before it completely die we would trigger some code to notify that something wrong has occured within the stream. 
  `setUncaughtExceptionHandler` comes handy in such situation.
 
 ```java 

@@ -169,6 +169,7 @@ pre {
   padding: 8px 12px;
   overflow-x: auto;
   word-wrap: normal;
+  white-space: pre-wrap; /*added to wrap text*/
 
   > code {
     border: 0;
