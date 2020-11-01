@@ -21,7 +21,7 @@
 title: Blog
 author: akatsuki06
 description: >- # this means to ignore newlines until "baseurl:"
-  Blog for sharing knowledge and experience on software engineering & development in general.
+  Personal blog for sharing knowledge and experience on software development & engineering.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://akatsuki06.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 lang: en
