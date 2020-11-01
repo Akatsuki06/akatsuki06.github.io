@@ -5,13 +5,10 @@ date:   2020-10-26 15:10:56 +0530
 categories: ssl security springboot
 ---
 
-<!-- bundle exec jekyll serve
- -->
 
-SSL (or its succesor TLS) is a communication  protocol used to transfer encrypted data over a network. It involves  <ins>Authentication</ins> of the entities and <ins>Encryption/Decryption</ins>  of data being shared between a web server and client.
+SSL (or its successor TLS) is a communication  protocol used to transfer encrypted data over a network. It involves  <ins>Authentication</ins> of the entities and <ins>Encryption/Decryption</ins>  of data being shared between a web server and client.
 
-This article talks about SSL and how we can setup it on a springboot application.
-
+This article talks about SSL and how we can setup it on a spring boot application.
 
 ### **Authentication**
 
@@ -31,12 +28,9 @@ Once the server is found authentic the client generates a shared key and encrypt
 
 >> The server presents its public key and certificates from keystore to the client, the client validates the certificate is present in truststore so that the server can be trusted.
 
-
----
 <br>  
 
 ## Setting up SSL in spring boot application
-
 
 ### Generating the keystore and truststore
 
@@ -110,11 +104,9 @@ server:
 
 ```
 
-
-
 ### Test it out
 
-Create one example controller: 
+Create one example controller:
 
 ```java
 @RestController
@@ -128,7 +120,7 @@ public class ExampleController {
 }
 ```
 
-In the application tests, create a RestClient configuration which would access the server with ssl. 
+In the application tests, create a RestClient configuration which would access the server with ssl.
 `SSLContextBuilder` and `HttpClients` are part of apache httpclients library.
 
 ```java
@@ -159,8 +151,8 @@ public class RestClientTest {
     }
 }
 
-
 ```
+
 A sample junit test to test the endpoint. Note the host url should have `https` protocol or it will fail during SSL handshake.
 
 ```java
