@@ -5,18 +5,33 @@ date:   2020-08-30 15:10:56 +0900
 categories: kafka stream microservice
 ---
 
-For a stream to be stable, resilient and reliable it is important that it handle failures gracefully. 
- Kafka streams failures are largely centered around the exceptions that occur during **deserialization** and  exceptions that occur during **interaction with broker**.
+For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. 
+Occurrence of failures can halt the stream and can cause serious disruption in the service.
 
-In this article I will explain how we can handle the fatal errors in Kafka stream and avoid the application to shutdown unexpectedly.
+Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application.
 
-## The failures
+This article talks about various kind of exception occurring in kafka stream and how to handle them.
 
-The data in a source topic of stream can have corrupt records for instance there can be records that doesn't follow the schema causing error on deserialization or there can be oversized records exceeding the `max.message.bytes` set for the topic its writing to, any occurrence of such data can halt the stream and can cause serious disruption in the service as well data loss if not handled properly.
+
+
+### Exceptions within the code
+
+Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception.
+
+```java 
+try {  
+    user = db.getUser(id) 
+}  
+catch (ReadTimeoutException e){  
+  //handle, retry, notify..
+}
+```
 
 ### Deserialization exception
 
-While consuming if a record doesn't follow the desired schema, it will throw deserialization exception, to handle it we setup a custom `DeserializationExceptionHandler`,  the defected record can be simply logged somewhere and the stream can continue without failing.
+These exception are thrown by kafka and can not be handled by a try-catch in our code.
+The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer.
+To handle such failures kafka provides `DeserializationExceptionHandler`. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing.
 
 ```java
 public class CustomDeserializationExceptionHandler implements DeserializationExceptionHandler {  
@@ -41,7 +56,8 @@ streamConfig.put("default.deserialization.exception.handler", CustomDeserializat
 
 ### Production exceptions
 
-These exceptions occur while the application interacts with the Kafka broker. For example after processing a record the stream processor forwards it to a topic but the record size exceeds the `max.message.bytes`  set for the topic. Thus it will throw a `RecordTooLargeException`  by default the stream will fail, with a custom `ProductionExceptionHandler` we can handle the exception, and avoid stream failure.
+Any exception that occur during kafka broker and client interaction is a production exception. An example is `RecordTooLargeException`.
+If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(`max.message.bytes`), it will throw a `RecordTooLargeException`. We can handle the exception using a custom `ProductionExceptionHandler`.
 
 ```java 
 public class CustomProductionExceptionHandler implements ProductionExceptionHandler {  
@@ -69,26 +85,9 @@ streamConfig.put("default.production.exception.handler", CustomProductionExcepti
 
 ```
 
+### Uncaught exceptions
 
-### Other exceptions
-
-Apart from the above scenarios we may have failures happening inside of the processor code as an example exceptions occurring on database calls.
-
-These can be handled by simply using a try-catch in the processor code: 
-```java 
-try {  
-    // code 
-}  
-catch (AnyException e){  
-  //handle, retry, notify..
-}
-```
-All the failed records can be forwarded to some other topic for further analysis and reprocessing.
-
-### When no option is left!
-
-Sometimes we are  left with NO option if any uncaught exception occurs, all we can do is wait for the stream thread to die, but before it completely die we would trigger some code to notify that something wrong has occurred within the stream. 
- `setUncaughtExceptionHandler` comes handy in such situation.
+If any uncaught exception occurs in a stream thread and kills the thread. The `setUncaughtExceptionHandler` method provides a way to trigger the last code when the thread abruptly terminates.
 
 ```java
 kafkaStreams.setUncaughtExceptionHandler((thread,exception) ->{
