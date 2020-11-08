@@ -87,7 +87,7 @@ streamConfig.put("default.production.exception.handler", CustomProductionExcepti
 
 ### Uncaught exceptions
 
-If any uncaught exception occurs in a stream thread and kills the thread. The `setUncaughtExceptionHandler` method provides a way to trigger the last code when the thread abruptly terminates.
+In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The `setUncaughtExceptionHandler` method provides a way to trigger some code on termination.
 
 ```java
 kafkaStreams.setUncaughtExceptionHandler((thread,exception) ->{
