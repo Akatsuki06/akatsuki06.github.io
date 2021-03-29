@@ -160,9 +160,12 @@
 
 .post-content {
   margin-bottom: $spacing-unit;
+  line-height: 1.95;
 
+  
   h1 {
     font-size: 38px;
+      margin: 0;
 
     @include media-query($on-laptop) {
       font-size: 34px;
@@ -171,6 +174,7 @@
 
   h2 {
     font-size: 32px;
+      margin: 0;
 
     @include media-query($on-laptop) {
       font-size: 28px;
@@ -179,7 +183,7 @@
 
   h3 {
     font-size: 26px;
-
+      margin: 0;
     @include media-query($on-laptop) {
       font-size: 22px;
     }
@@ -187,7 +191,6 @@
 
   h4 {
     font-size: 20px;
-
     @include media-query($on-laptop) {
       font-size: 18px;
     }
