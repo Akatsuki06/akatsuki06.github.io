@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Blog</title>
+  <meta name="description" content="Personal blog for sharing knowledge and experience on software development &amp; engineering.">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://akatsuki06.github.io/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Blog" href="https://akatsuki06.github.io/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Blog">
+  <meta property="og:site_name" content="Blog">
+  <meta property="og:url" content="https://akatsuki06.github.io/">
+  <meta property="og:description" content="Personal blog for sharing knowledge and experience on software development &amp; engineering.">
+  
+  
+  <meta name="twitter:card" content="summary">
+  
+  <meta name="twitter:title" content="Blog">
+  <meta name="twitter:description" content="Personal blog for sharing knowledge and experience on software development &amp; engineering.">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Poppins:wght,400i,700&amp;display=swap" rel="stylesheet">
+
+
+  
+  <!-- Google Analytics -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-105829162-2', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Blog</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/archives/">archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home">
+
+  
+
+  
+
+  <ul class="post-list">
+    
+      
+      
+
+      <li>
+        <header class="post-header">
+          <h1 class="post-title">
+            
+              <a class="post-link" href="/2021/03/24/github-actions-workflow-to-generate-custom-toc/">Github actions workflow to generate custom TOC</a>
+            
+          </h1>
+
+          <p class="post-meta">
+            Mar 24, 2021
+            
+               •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/categories/github/">github</a>,
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/categories/automation/">automation</a>
+      
+    
+  
+
+
+
+
+            
+            
+          </p>
+        </header>
+
+        <div class="post-content">
+          <h2><u>Background</u></h2>
+
+<p>Other than writing code, I have been using github for storing and organizing my daily notes. Github allows simplicity and flexibility to work with markdown notes, further it has the ability to version the files and view them across multiple devices. But as the total number of the file grows navigation becomes a bottleneck.
+To tackle this issue I am generating a table of content(TOC) in the README so that I can quickly access a file from the README itself. The other advantage it provides is I get a summary of all notes I have in the project.</p>
+
+<p>In this article, I am going to show you how to create a github actions workflow and make it generate the table of contents automatically for your project.</p>
+
+<h2><u>Workflow</u></h2>
+
+<p>Github Actions enables us to create workflows (like CI/CD capabilities) that can be integrated directly into our github code repository and runs on github hosted environments. These workflows are triggered automatically on occurrence of some event.</p>
+
+<p>I have all the code and files committed in this demo github repository <a href="https://github.com/Akatsuki06/toc-workflow-demo">toc-demo</a>.
+This is how the file structure for the example project looks like.</p>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/16136908/112720042-278acd00-8f22-11eb-9b4e-82c7b2b2f776.png" alt="Sublime's custom image" />
+</p>
+
+<p>The github actions workflow is defined in a yaml file so we will create a file <code class="language-plaintext highlighter-rouge">.github/workflows/action.yml</code>.</p>
+
+<p>We will write a script that can generate the table of contents and then commit the changes and push! We will automate this workflow using the github actions.</p>
+
+<h3>Workflow file</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">toc-workflow-demo</span>
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span> <span class="nv">main</span> <span class="pi">]</span>
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">build</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-latest</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">checkout repo content</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">setup python</span>
+        <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/setup-python@v2</span>
+        <span class="na">with</span><span class="pi">:</span>
+          <span class="na">python-version</span><span class="pi">:</span> <span class="m">3.8</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">execute py script</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">python script.py</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">commit changes</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">git config user.name github-actions</span>
+          <span class="s">git config user.email github-actions@github.com</span>
+          <span class="s">echo `git add . &amp;&amp; git commit -m "Auto generated commit"`</span>
+          <span class="s">echo `git push`</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Update Status</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">echo Updated Index successfully,</span>
+          <span class="s">echo Auto commit changes</span>
+</code></pre></div></div>
+
+<p>Summarizing the action file:</p>
+
+<ul>
+  <li>the job is triggered when changes are pushed on to the <code class="language-plaintext highlighter-rouge">main</code> branch.</li>
+  <li>the steps explained:
+    <ul>
+      <li>the <code class="language-plaintext highlighter-rouge">actions/checkout@v2</code> checks-out the repository <code class="language-plaintext highlighter-rouge">toc-workflow-demo</code>.</li>
+      <li>the <code class="language-plaintext highlighter-rouge">actions/setup-python@v2</code> setups python v3.8 in our actions environment.</li>
+      <li>the job runs a script  <code class="language-plaintext highlighter-rouge">script.py</code> to generate TOC and write to a file</li>
+      <li>the end step is to commit the changes script made and push them to github.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Script</h3>
+
+<p>To generate TOC we require the name and path of all files.
+This python script reads through all files in the directory and generates a table of content in a tree hierarchy format. You can modify this script to create what fits you best.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">os</span>
+             
+<span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">'README.md'</span><span class="p">,</span><span class="s">'w+'</span><span class="p">)</span>
+<span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">'# Notes'</span><span class="p">)</span>
+<span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">'</span><span class="se">\n\n\n</span><span class="s">'</span><span class="p">)</span>
+<span class="n">startpath</span> <span class="o">=</span> <span class="s">'./notes'</span>
+
+<span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="p">.</span><span class="n">walk</span><span class="p">(</span><span class="n">startpath</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">startpath</span><span class="p">:</span>
+      <span class="n">level</span> <span class="o">=</span> <span class="n">root</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">startpath</span><span class="p">,</span> <span class="s">''</span><span class="p">).</span><span class="n">count</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">sep</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span>
+      <span class="n">indent</span> <span class="o">=</span> <span class="s">' '</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">level</span><span class="p">)</span>
+      <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">'{}- {}'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">indent</span><span class="p">,</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">basename</span><span class="p">(</span><span class="n">root</span><span class="p">)))</span>
+      <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+      <span class="n">subindent</span> <span class="o">=</span> <span class="s">' '</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="nb">file</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">"{}- [{}]({})"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">subindent</span><span class="p">,</span><span class="nb">file</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3><u>Conclusion</u></h3>
+
+<p>Once all the code changes are committed and code is pushed to github. Github actions will run the jobs and auto-commit the table of content to project README.
+The following table of content has been generated by the github actions in the demo project.
+We can click on the file name to navigate to the file.
+<img src="https://user-images.githubusercontent.com/16136908/112727828-48671880-8f4a-11eb-99e5-5c7f8858fc16.png" alt="image" /></p>
+
+<p>Next time any new file is added, removed or modified and committed to github, github actions will take care of generating the TOC in the project README.</p>
+
+        </div>
+        
+      </li>
+    
+      
+      
+
+      <li>
+        <header class="post-header">
+          <h1 class="post-title">
+            
+              <a class="post-link" href="/2020/10/26/ssl-in-spring-boot-application/">SSL in a Spring Boot application</a>
+            
+          </h1>
+
+          <p class="post-meta">
+            Oct 26, 2020
+            
+               •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/categories/ssl/">ssl</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/categories/security/">security</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/categories/springboot/">springboot</a>
+      
+    
+      
+    
+      
+    
+  
+
+
+
+
+            
+            
+          </p>
+        </header>
+
+        <div class="post-content">
+          <p>SSL (or its successor TLS) is a communication  protocol used to transfer encrypted data over a network. It involves  <ins>Authentication</ins> of the entities and <ins>Encryption/Decryption</ins>  of data being shared between a web server and client.</p>
+
+<p>This article talks about SSL and how we can setup it on a spring boot application.</p>
+
+<h3><strong>Authentication</strong></h3>
+
+<p>Authentication of entities on a network is established using digital certificate. Typically in a one way handshake, the server has a keystore which holds a private key, a public key and a <em>x509</em>  certificate where the public and private keys form a pair, private key is used for decryption and public key is used for encryption of data.</p>
+
+<p>There is a truststore which stores all trusted certificates signed by CA. Client/Server refers to it to validate a certificate.</p>
+
+<p>When a client sends a request to server, the server responds back with the certificate and the public key.</p>
+
+<p>Client authenticates the server by validating if the certificate received is present in truststore or not. In many cases the server would also validate its client that process is referred to as two way handshake.</p>
+
+<h3><strong>Encryption</strong></h3>
+
+<p>Once the server is found authentic the client generates a shared key and encrypts it using server’s public key. It sends the encrypted shared key to the server where the server decrypts it using its private key. Now both server and client have a shared session key which can be used for encryption and decryption of data being transferred between them.</p>
+
+<p><img src="https://user-images.githubusercontent.com/16136908/97805333-72f2c500-1c7b-11eb-83a3-49ce02376c9b.png" alt="image" /></p>
+
+<blockquote>
+  <blockquote>
+    <p>The server presents its public key and certificates from keystore to the client, the client validates the certificate is present in truststore so that the server can be trusted.</p>
+  </blockquote>
+</blockquote>
+
+<p><br /></p>
+
+<h2>Setting up SSL in spring boot application</h2>
+
+<h3>Generating the keystore and truststore</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c"># Generate a private key</span>
+ openssl genrsa <span class="nt">-des3</span> <span class="nt">-out</span> privatekey.key 1024
+
+<span class="c"># Generate Certificate signeding Request (CSR)</span>
+<span class="c"># CN should be the domain-name or localhost for running in local</span>
+openssl req <span class="nt">-new</span> <span class="nt">-key</span> privatekey.key <span class="nt">-out</span> csrfile.csr
+
+<span class="c"># Generate self signed certificate</span>
+openssl x509 <span class="nt">-req</span> <span class="nt">-days</span> 365 <span class="nt">-in</span> csrfile.csr <span class="nt">-signkey</span> privatekey.key <span class="nt">-out</span> public.crt
+
+<span class="c"># Import the self signed certificate to a truststore file</span>
+keytool <span class="nt">-import</span> <span class="nt">-file</span> public.crt <span class="nt">-alias</span> exampleCA <span class="nt">-keystore</span> truststore.jks
+
+<span class="c"># Import the keypair and certificates to a keystore file</span>
+openssl pkcs12 <span class="nt">-export</span> <span class="nt">-in</span> public.crt <span class="nt">-inkey</span> privatekey.key <span class="nt">-certfile</span> public.crt <span class="nt">-name</span> <span class="s2">"certs"</span> <span class="nt">-out</span> keystore.p12
+
+<span class="c"># to convert p12 to jks</span>
+keytool <span class="nt">-importkeystore</span> <span class="nt">-srckeystore</span> keystore.p12 <span class="nt">-srcstoretype</span> pkcs12 <span class="nt">-destkeystore</span> keystore.jks <span class="nt">-deststoretype</span> JKS
+
+</code></pre></div></div>
+
+<h2>Configuring the server</h2>
+
+<p>Once the certificates are generated copy the truststore and keystore .jks files to the classpath of your spring boot application.
+Here I am using spring <code class="language-plaintext highlighter-rouge">2.3.4.RELEASE</code>, spring-security dependency is required in the pom file.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;dependency&gt;</span>
+      <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+      <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-security<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;/dependency&gt;</span>
+
+</code></pre></div></div>
+
+<p>Add a <code class="language-plaintext highlighter-rouge">WebSecurityConfig</code> extending <code class="language-plaintext highlighter-rouge">WebSecurityConfigurerAdapter</code> class to allow request on https
+and block any request coming from a non-secure HTTP channel.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="nd">@EnableWebSecurity</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebSecurityConfig</span> <span class="kd">extends</span> <span class="nc">WebSecurityConfigurerAdapter</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">HttpSecurity</span> <span class="n">http</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="n">http</span><span class="o">.</span><span class="na">requiresChannel</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">anyRequest</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">requiresSecure</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Update the spring application yaml file as below.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">server</span><span class="pi">:</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">8443</span>
+  <span class="na">ssl</span><span class="pi">:</span>
+    <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">key-store</span><span class="pi">:</span> <span class="s">classpath:keystore.jks</span>
+    <span class="na">key-store-password</span><span class="pi">:</span> <span class="s">password</span>
+    <span class="na">trust-store</span><span class="pi">:</span> <span class="s">classpath:truststore.jks</span>
+    <span class="na">trust-store-password</span><span class="pi">:</span> <span class="s">password</span>
+    <span class="na">client-auth</span><span class="pi">:</span> <span class="s">need</span>
+
+</code></pre></div></div>
+
+<h3>Test it out</h3>
+
+<p>Create one example controller:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/ssl"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExampleController</span> <span class="o">{</span>
+
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">path</span><span class="o">=</span><span class="s">"/example"</span><span class="o">,</span> <span class="n">method</span><span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">GET</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">apiRequest</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="s">"Successfully Validated!"</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>In the application tests, create a RestClient configuration which would access the server with ssl.
+<code class="language-plaintext highlighter-rouge">SSLContextBuilder</code> and <code class="language-plaintext highlighter-rouge">HttpClients</code> are part of apache httpclients library.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RestClientTest</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">password</span> <span class="o">=</span> <span class="s">"password"</span><span class="o">;</span>
+
+    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">RestTemplate</span> <span class="nf">restTemplate</span><span class="o">(</span><span class="nc">RestTemplateBuilder</span> <span class="n">builder</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="nc">SSLContext</span> <span class="n">sslContext</span> <span class="o">=</span> <span class="nc">SSLContextBuilder</span>
+                <span class="o">.</span><span class="na">create</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">loadKeyMaterial</span><span class="o">(</span><span class="nc">ResourceUtils</span><span class="o">.</span><span class="na">getFile</span><span class="o">(</span><span class="s">"classpath:keystore.jks"</span><span class="o">),</span>
+                                         <span class="n">password</span><span class="o">.</span><span class="na">toCharArray</span><span class="o">(),</span> <span class="n">password</span><span class="o">.</span><span class="na">toCharArray</span><span class="o">())</span>
+                <span class="o">.</span><span class="na">loadTrustMaterial</span><span class="o">(</span><span class="nc">ResourceUtils</span><span class="o">.</span><span class="na">getFile</span><span class="o">(</span><span class="s">"classpath:truststore.jks"</span><span class="o">),</span> <span class="n">password</span><span class="o">.</span><span class="na">toCharArray</span><span class="o">())</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+        <span class="k">return</span> <span class="n">builder</span>
+                <span class="o">.</span><span class="na">requestFactory</span><span class="o">(</span>
+                        <span class="o">()-&gt;</span><span class="k">new</span> <span class="nc">HttpComponentsClientHttpRequestFactory</span><span class="o">(</span>
+                                <span class="nc">HttpClients</span><span class="o">.</span><span class="na">custom</span><span class="o">()</span>
+                                <span class="o">.</span><span class="na">setSSLContext</span><span class="o">(</span><span class="n">sslContext</span><span class="o">)</span>
+                                <span class="o">.</span><span class="na">build</span><span class="o">()</span>
+                        <span class="o">)</span>
+                <span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>A sample junit test to test the endpoint. Note the host url should have <code class="language-plaintext highlighter-rouge">https</code> protocol or it will fail during SSL handshake.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RunWith</span><span class="o">(</span><span class="nc">SpringRunner</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+<span class="nd">@SpringBootTest</span><span class="o">(</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="nc">Application</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
+    <span class="n">webEnvironment</span> <span class="o">=</span> <span class="nc">SpringBootTest</span><span class="o">.</span><span class="na">WebEnvironment</span><span class="o">.</span><span class="na">RANDOM_PORT</span>
+<span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ApplicationTests</span> <span class="o">{</span>
+
+    <span class="kd">public</span> <span class="nf">ApplicationTests</span><span class="o">(){</span>
+    <span class="o">}</span>
+
+    <span class="nd">@LocalServerPort</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">port</span><span class="o">;</span>
+
+    <span class="nd">@Autowired</span>
+    <span class="kd">private</span> <span class="nc">RestTemplate</span> <span class="n">restTemplate</span><span class="o">;</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">withSSL</span><span class="o">()</span> <span class="o">{</span>
+      <span class="nc">String</span> <span class="n">response</span> <span class="o">=</span> <span class="n">restTemplate</span><span class="o">.</span><span class="na">getForObject</span><span class="o">(</span><span class="s">"https://localhost:"</span> <span class="o">+</span> <span class="n">port</span> <span class="o">+</span> <span class="s">"/ssl/example"</span><span class="o">,</span> <span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+      <span class="nc">Assert</span><span class="o">.</span><span class="na">assertEquals</span><span class="o">(</span><span class="s">"Successfully Validated!"</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+        </div>
+        
+      </li>
+    
+      
+      
+
+      <li>
+        <header class="post-header">
+          <h1 class="post-title">
+            
+              <a class="post-link" href="/2020/08/30/handling-failures-in-kafka-stream/">Handling failures in Kafka streams</a>
+            
+          </h1>
+
+          <p class="post-meta">
+            Aug 30, 2020
+            
+               •
+  
+    
+    
+      
+        <a href="/categories/kafka/">kafka</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+        <a href="/categories/stream/">stream</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+        <a href="/categories/microservice/">microservice</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+
+
+
+            
+            
+          </p>
+        </header>
+
+        <div class="post-content">
+          <p>For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. 
+Occurrence of failures can halt the stream and can cause serious disruption in the service.</p>
+
+<p>Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application.</p>
+
+<p>This article talks about various kind of exception occurring in kafka stream and how to handle them.</p>
+
+<h3>Exceptions within the code</h3>
+
+<p>Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span> <span class="o">{</span>  
+    <span class="n">user</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">getUser</span><span class="o">(</span><span class="n">id</span><span class="o">)</span> 
+<span class="o">}</span>  
+<span class="k">catch</span> <span class="o">(</span><span class="nc">ReadTimeoutException</span> <span class="n">e</span><span class="o">){</span>  
+  <span class="c1">//handle, retry, notify..</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3>Deserialization exception</h3>
+
+<p>These exception are thrown by kafka and can not be handled by a try-catch in our code.
+The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer.
+To handle such failures kafka provides <code class="language-plaintext highlighter-rouge">DeserializationExceptionHandler</code>. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomDeserializationExceptionHandler</span> <span class="kd">implements</span> <span class="nc">DeserializationExceptionHandler</span> <span class="o">{</span>  
+  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="nc">DeserializationHandlerResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">ProcessorContext</span> <span class="n">context</span><span class="o">,</span> <span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[],</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">record</span><span class="o">,</span> 
+  									<span class="nc">Exception</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="c1">//logic to deal with the corrupt record  </span>
+  	<span class="k">return</span> <span class="nc">DeserializationHandlerResponse</span><span class="o">.</span><span class="na">CONTINUE</span><span class="o">;</span>  
+    <span class="o">}</span>  
+  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">map</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="c1">//can read any property set in the stream here  </span>
+  <span class="o">}</span>  
+<span class="o">}</span>
+
+<span class="c1">// in the streams config</span>
+<span class="n">streamConfig</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"default.deserialization.exception.handler"</span><span class="o">,</span> <span class="nc">CustomDeserializationExceptionHandler</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<h3>Production exceptions</h3>
+
+<p>Any exception that occur during kafka broker and client interaction is a production exception. An example is <code class="language-plaintext highlighter-rouge">RecordTooLargeException</code>.
+If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(<code class="language-plaintext highlighter-rouge">max.message.bytes</code>), it will throw a <code class="language-plaintext highlighter-rouge">RecordTooLargeException</code>. We can handle the exception using a custom <code class="language-plaintext highlighter-rouge">ProductionExceptionHandler</code>.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomProductionExceptionHandler</span> <span class="kd">implements</span> <span class="nc">ProductionExceptionHandler</span> <span class="o">{</span>  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="nc">ProductionExceptionHandlerResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">ProducerRecord</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[],</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">record</span><span class="o">,</span>
+  								 <span class="nc">Exception</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>  
+          
+        <span class="k">if</span> <span class="o">(</span><span class="n">exception</span> <span class="k">instanceof</span> <span class="nc">RecordTooLargeException</span><span class="o">){</span>  
+            <span class="c1">// code to deal with large record..  </span>
+ 		 <span class="k">return</span> <span class="nc">ProductionExceptionHandlerResponse</span><span class="o">.</span><span class="na">CONTINUE</span><span class="o">;</span>  
+        <span class="o">}</span>  
+          <span class="c1">//other conditional checks</span>
+          
+        <span class="k">return</span> <span class="nc">ProductionExceptionHandlerResponse</span><span class="o">.</span><span class="na">FAIL</span><span class="o">;</span>  
+    <span class="o">}</span>  
+  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">map</span><span class="o">)</span> <span class="o">{</span>  
+  
+    <span class="o">}</span>  
+<span class="o">}</span>
+
+<span class="c1">//in the streams config</span>
+<span class="n">streamConfig</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"default.production.exception.handler"</span><span class="o">,</span> <span class="nc">CustomProductionExceptionHandler</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<h3>Uncaught exceptions</h3>
+
+<p>In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The <code class="language-plaintext highlighter-rouge">setUncaughtExceptionHandler</code> method provides a way to trigger some code on termination.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kafkaStreams</span><span class="o">.</span><span class="na">setUncaughtExceptionHandler</span><span class="o">((</span><span class="n">thread</span><span class="o">,</span><span class="n">exception</span><span class="o">)</span> <span class="o">-&gt;{</span>
+    <span class="c1">//code to be triggered</span>
+<span class="o">});</span>
+
+</code></pre></div></div>
+
+<p><br /></p>
+
+<hr />
+
+<p>References:</p>
+
+<ul>
+  <li><a href="https://kafka.apache.org/">Apache Kafka</a></li>
+  <li><a href="https://docs.confluent.io/current/index.html">Confluent docs</a></li>
+</ul>
+
+
+        </div>
+        
+      </li>
+    
+  </ul>
+
+  
+
+
+</div>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; akatsuki06<br>
+ Powered by <a href="https://pages.github.com/">Github Pages</a> <br>Theme by <a href="https://github.com/yous/whiteglass">Whiteglass</a> <br>
+ <!-- Subscribe via <a href="https://akatsuki06.github.io/feed.xml">RSS</a> -->
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

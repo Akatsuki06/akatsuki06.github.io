@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Handling failures in Kafka streams</title>
+  <meta name="description" content="For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. Occurrence of failures can halt the stream and can cause serious disruption in the service. Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application. This article talks about various kind of exception occurring in kafka stream and how to handle them. Exceptions within the code Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception. try { user = db.getUser(id) } catch (ReadTimeoutException e){ //handle, retry, notify.. } Deserialization exception These exception are thrown by kafka and can not be handled by a try-catch in our code. The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer. To handle such failures kafka provides DeserializationExceptionHandler. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing. public class CustomDeserializationExceptionHandler implements DeserializationExceptionHandler { @Override public DeserializationHandlerResponse handle(ProcessorContext context, ConsumerRecord&amp;lt;byte[], byte[]&amp;gt; record, Exception exception) { //logic to deal with the corrupt record return DeserializationHandlerResponse.CONTINUE; } @Override public void configure(Map&amp;lt;String, ?&amp;gt; map) { //can read any property set in the stream here } } // in the streams config streamConfig.put(&quot;default.deserialization.exception.handler&quot;, CustomDeserializationExceptionHandler.class); Production exceptions Any exception that occur during kafka broker and client interaction is a production exception. An example is RecordTooLargeException. If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(max.message.bytes), it will throw a RecordTooLargeException. We can handle the exception using a custom ProductionExceptionHandler. public class CustomProductionExceptionHandler implements ProductionExceptionHandler { @Override public ProductionExceptionHandlerResponse handle(ProducerRecord&amp;lt;byte[], byte[]&amp;gt; record, Exception exception) { if (exception instanceof RecordTooLargeException){ // code to deal with large record.. return ProductionExceptionHandlerResponse.CONTINUE; } //other conditional checks return ProductionExceptionHandlerResponse.FAIL; } @Override public void configure(Map&amp;lt;String, ?&amp;gt; map) { } } //in the streams config streamConfig.put(&quot;default.production.exception.handler&quot;, CustomProductionExceptionHandler.class); Uncaught exceptions In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The setUncaughtExceptionHandler method provides a way to trigger some code on termination. kafkaStreams.setUncaughtExceptionHandler((thread,exception) -&amp;gt;{ //code to be triggered }); References: Apache Kafka Confluent docs">
+  
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="https://akatsuki06.github.io/2020/08/30/handling-failures-in-kafka-stream/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="Blog" href="https://akatsuki06.github.io/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Handling failures in Kafka streams">
+  <meta property="og:site_name" content="Blog">
+  <meta property="og:url" content="https://akatsuki06.github.io/2020/08/30/handling-failures-in-kafka-stream/">
+  <meta property="og:description" content="For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. Occurrence of failures can halt the stream and can cause serious disruption in the service. Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application. This article talks about various kind of exception occurring in kafka stream and how to handle them. Exceptions within the code Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception. try { user = db.getUser(id) } catch (ReadTimeoutException e){ //handle, retry, notify.. } Deserialization exception These exception are thrown by kafka and can not be handled by a try-catch in our code. The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer. To handle such failures kafka provides DeserializationExceptionHandler. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing. public class CustomDeserializationExceptionHandler implements DeserializationExceptionHandler { @Override public DeserializationHandlerResponse handle(ProcessorContext context, ConsumerRecord&amp;lt;byte[], byte[]&amp;gt; record, Exception exception) { //logic to deal with the corrupt record return DeserializationHandlerResponse.CONTINUE; } @Override public void configure(Map&amp;lt;String, ?&amp;gt; map) { //can read any property set in the stream here } } // in the streams config streamConfig.put(&quot;default.deserialization.exception.handler&quot;, CustomDeserializationExceptionHandler.class); Production exceptions Any exception that occur during kafka broker and client interaction is a production exception. An example is RecordTooLargeException. If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(max.message.bytes), it will throw a RecordTooLargeException. We can handle the exception using a custom ProductionExceptionHandler. public class CustomProductionExceptionHandler implements ProductionExceptionHandler { @Override public ProductionExceptionHandlerResponse handle(ProducerRecord&amp;lt;byte[], byte[]&amp;gt; record, Exception exception) { if (exception instanceof RecordTooLargeException){ // code to deal with large record.. return ProductionExceptionHandlerResponse.CONTINUE; } //other conditional checks return ProductionExceptionHandlerResponse.FAIL; } @Override public void configure(Map&amp;lt;String, ?&amp;gt; map) { } } //in the streams config streamConfig.put(&quot;default.production.exception.handler&quot;, CustomProductionExceptionHandler.class); Uncaught exceptions In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The setUncaughtExceptionHandler method provides a way to trigger some code on termination. kafkaStreams.setUncaughtExceptionHandler((thread,exception) -&amp;gt;{ //code to be triggered }); References: Apache Kafka Confluent docs">
+  
+  
+  <meta name="twitter:card" content="summary">
+  
+  <meta name="twitter:title" content="Handling failures in Kafka streams">
+  <meta name="twitter:description" content="For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. Occurrence of failures can halt the stream and can cause serious disruption in the servic...">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Poppins:wght,400i,700&amp;display=swap" rel="stylesheet">
+
+
+  
+  <!-- Google Analytics -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-105829162-2', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Blog</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/archives/">archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Handling failures in Kafka streams</h1>
+    
+    <p class="post-meta"><time datetime="2020-08-30T06:10:56+00:00" itemprop="datePublished">Aug 30, 2020</time> •
+  
+    
+    
+      
+        <a href="/categories/kafka/">kafka</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+        <a href="/categories/stream/">stream</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+        <a href="/categories/microservice/">microservice</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. 
+Occurrence of failures can halt the stream and can cause serious disruption in the service.</p>
+
+<p>Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application.</p>
+
+<p>This article talks about various kind of exception occurring in kafka stream and how to handle them.</p>
+
+<h3>Exceptions within the code</h3>
+
+<p>Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span> <span class="o">{</span>  
+    <span class="n">user</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">getUser</span><span class="o">(</span><span class="n">id</span><span class="o">)</span> 
+<span class="o">}</span>  
+<span class="k">catch</span> <span class="o">(</span><span class="nc">ReadTimeoutException</span> <span class="n">e</span><span class="o">){</span>  
+  <span class="c1">//handle, retry, notify..</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3>Deserialization exception</h3>
+
+<p>These exception are thrown by kafka and can not be handled by a try-catch in our code.
+The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer.
+To handle such failures kafka provides <code class="language-plaintext highlighter-rouge">DeserializationExceptionHandler</code>. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomDeserializationExceptionHandler</span> <span class="kd">implements</span> <span class="nc">DeserializationExceptionHandler</span> <span class="o">{</span>  
+  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="nc">DeserializationHandlerResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">ProcessorContext</span> <span class="n">context</span><span class="o">,</span> <span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[],</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">record</span><span class="o">,</span> 
+  									<span class="nc">Exception</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="c1">//logic to deal with the corrupt record  </span>
+  	<span class="k">return</span> <span class="nc">DeserializationHandlerResponse</span><span class="o">.</span><span class="na">CONTINUE</span><span class="o">;</span>  
+    <span class="o">}</span>  
+  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">map</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="c1">//can read any property set in the stream here  </span>
+  <span class="o">}</span>  
+<span class="o">}</span>
+
+<span class="c1">// in the streams config</span>
+<span class="n">streamConfig</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"default.deserialization.exception.handler"</span><span class="o">,</span> <span class="nc">CustomDeserializationExceptionHandler</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<h3>Production exceptions</h3>
+
+<p>Any exception that occur during kafka broker and client interaction is a production exception. An example is <code class="language-plaintext highlighter-rouge">RecordTooLargeException</code>.
+If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(<code class="language-plaintext highlighter-rouge">max.message.bytes</code>), it will throw a <code class="language-plaintext highlighter-rouge">RecordTooLargeException</code>. We can handle the exception using a custom <code class="language-plaintext highlighter-rouge">ProductionExceptionHandler</code>.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomProductionExceptionHandler</span> <span class="kd">implements</span> <span class="nc">ProductionExceptionHandler</span> <span class="o">{</span>  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="nc">ProductionExceptionHandlerResponse</span> <span class="nf">handle</span><span class="o">(</span><span class="nc">ProducerRecord</span><span class="o">&lt;</span><span class="kt">byte</span><span class="o">[],</span> <span class="kt">byte</span><span class="o">[]&gt;</span> <span class="n">record</span><span class="o">,</span>
+  								 <span class="nc">Exception</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>  
+          
+        <span class="k">if</span> <span class="o">(</span><span class="n">exception</span> <span class="k">instanceof</span> <span class="nc">RecordTooLargeException</span><span class="o">){</span>  
+            <span class="c1">// code to deal with large record..  </span>
+ 		 <span class="k">return</span> <span class="nc">ProductionExceptionHandlerResponse</span><span class="o">.</span><span class="na">CONTINUE</span><span class="o">;</span>  
+        <span class="o">}</span>  
+          <span class="c1">//other conditional checks</span>
+          
+        <span class="k">return</span> <span class="nc">ProductionExceptionHandlerResponse</span><span class="o">.</span><span class="na">FAIL</span><span class="o">;</span>  
+    <span class="o">}</span>  
+  
+  <span class="nd">@Override</span>  
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">map</span><span class="o">)</span> <span class="o">{</span>  
+  
+    <span class="o">}</span>  
+<span class="o">}</span>
+
+<span class="c1">//in the streams config</span>
+<span class="n">streamConfig</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"default.production.exception.handler"</span><span class="o">,</span> <span class="nc">CustomProductionExceptionHandler</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+</code></pre></div></div>
+
+<h3>Uncaught exceptions</h3>
+
+<p>In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The <code class="language-plaintext highlighter-rouge">setUncaughtExceptionHandler</code> method provides a way to trigger some code on termination.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kafkaStreams</span><span class="o">.</span><span class="na">setUncaughtExceptionHandler</span><span class="o">((</span><span class="n">thread</span><span class="o">,</span><span class="n">exception</span><span class="o">)</span> <span class="o">-&gt;{</span>
+    <span class="c1">//code to be triggered</span>
+<span class="o">});</span>
+
+</code></pre></div></div>
+
+<p><br /></p>
+
+<hr />
+
+<p>References:</p>
+
+<ul>
+  <li><a href="https://kafka.apache.org/">Apache Kafka</a></li>
+  <li><a href="https://docs.confluent.io/current/index.html">Confluent docs</a></li>
+</ul>
+
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; akatsuki06<br>
+ Powered by <a href="https://pages.github.com/">Github Pages</a> <br>Theme by <a href="https://github.com/yous/whiteglass">Whiteglass</a> <br>
+ <!-- Subscribe via <a href="https://akatsuki06.github.io/feed.xml">RSS</a> -->
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

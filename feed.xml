@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <generator uri="http://jekyllrb.com" version="4.1.1">Jekyll</generator>
+  
+  
+  <link href="https://akatsuki06.github.io/feed.xml" rel="self" type="application/atom+xml" />
+  <link href="https://akatsuki06.github.io/" rel="alternate" type="text/html" hreflang="en" />
+  <updated>2021-03-29T15:52:36+00:00</updated>
+  <id>https://akatsuki06.github.io//</id>
+
+  
+    <title type="html">Blog</title>
+  
+
+  
+    <subtitle>Personal blog for sharing knowledge and experience on software development &amp; engineering.</subtitle>
+  
+
+  
+    <author>
+        <name>akatsuki06</name>
+      
+      
+    </author>
+  
+
+  
+  
+    <entry >
+      
+      <title type="html">Github actions workflow to generate custom TOC</title>
+      
+      
+      <link href="https://akatsuki06.github.io/2021/03/24/github-actions-workflow-to-generate-custom-toc/" rel="alternate" type="text/html" title="Github actions workflow to generate custom TOC" />
+      
+      <published>2021-03-24T05:31:56+00:00</published>
+      <updated>2021-03-24T05:31:56+00:00</updated>
+      <id>https://akatsuki06.github.io/2021/03/24/github-actions-workflow-to-generate-custom-toc</id>
+      <content type="html" xml:base="https://akatsuki06.github.io/2021/03/24/github-actions-workflow-to-generate-custom-toc/">&lt;h2&gt;&lt;u&gt;Background&lt;/u&gt;&lt;/h2&gt;
+
+&lt;p&gt;Other than writing code, I have been using github for storing and organizing my daily notes. Github allows simplicity and flexibility to work with markdown notes, further it has the ability to version the files and view them across multiple devices. But as the total number of the file grows navigation becomes a bottleneck.
+To tackle this issue I am generating a table of content(TOC) in the README so that I can quickly access a file from the README itself. The other advantage it provides is I get a summary of all notes I have in the project.&lt;/p&gt;
+
+&lt;p&gt;In this article, I am going to show you how to create a github actions workflow and make it generate the table of contents automatically for your project.&lt;/p&gt;
+
+&lt;h2&gt;&lt;u&gt;Workflow&lt;/u&gt;&lt;/h2&gt;
+
+&lt;p&gt;Github Actions enables us to create workflows (like CI/CD capabilities) that can be integrated directly into our github code repository and runs on github hosted environments. These workflows are triggered automatically on occurrence of some event.&lt;/p&gt;
+
+&lt;p&gt;I have all the code and files committed in this demo github repository &lt;a href=&quot;https://github.com/Akatsuki06/toc-workflow-demo&quot;&gt;toc-demo&lt;/a&gt;.
+This is how the file structure for the example project looks like.&lt;/p&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;https://user-images.githubusercontent.com/16136908/112720042-278acd00-8f22-11eb-9b4e-82c7b2b2f776.png&quot; alt=&quot;Sublime's custom image&quot; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The github actions workflow is defined in a yaml file so we will create a file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.github/workflows/action.yml&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;We will write a script that can generate the table of contents and then commit the changes and push! We will automate this workflow using the github actions.&lt;/p&gt;
+
+&lt;h3&gt;Workflow file&lt;/h3&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;toc-workflow-demo&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;on&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;branches&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;main&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;jobs&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;runs-on&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ubuntu-latest&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;steps&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;checkout repo content&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;uses&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;actions/checkout@v2&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;setup python&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;uses&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;actions/setup-python@v2&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;python-version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;3.8&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;execute py script&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;python script.py&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;commit changes&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;git config user.name github-actions&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;git config user.email github-actions@github.com&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;echo `git add . &amp;amp;&amp;amp; git commit -m &quot;Auto generated commit&quot;`&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;echo `git push`&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Update Status&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;echo Updated Index successfully,&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;echo Auto commit changes&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Summarizing the action file:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;the job is triggered when changes are pushed on to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; branch.&lt;/li&gt;
+  &lt;li&gt;the steps explained:
+    &lt;ul&gt;
+      &lt;li&gt;the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;actions/checkout@v2&lt;/code&gt; checks-out the repository &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;toc-workflow-demo&lt;/code&gt;.&lt;/li&gt;
+      &lt;li&gt;the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;actions/setup-python@v2&lt;/code&gt; setups python v3.8 in our actions environment.&lt;/li&gt;
+      &lt;li&gt;the job runs a script  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;script.py&lt;/code&gt; to generate TOC and write to a file&lt;/li&gt;
+      &lt;li&gt;the end step is to commit the changes script made and push them to github.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Script&lt;/h3&gt;
+
+&lt;p&gt;To generate TOC we require the name and path of all files.
+This python script reads through all files in the directory and generates a table of content in a tree hierarchy format. You can modify this script to create what fits you best.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
+             
+&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'README.md'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'w+'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'# Notes'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n\n\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;startpath&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'./notes'&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;root&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dirs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;files&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;walk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;startpath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;root&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;startpath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;level&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;root&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;replace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;startpath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;indent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;level&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'{}- {}'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;indent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;basename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;root&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;subindent&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;level&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;root&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{}- [{}]({})&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subindent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3&gt;&lt;u&gt;Conclusion&lt;/u&gt;&lt;/h3&gt;
+
+&lt;p&gt;Once all the code changes are committed and code is pushed to github. Github actions will run the jobs and auto-commit the table of content to project README.
+The following table of content has been generated by the github actions in the demo project.
+We can click on the file name to navigate to the file.
+&lt;img src=&quot;https://user-images.githubusercontent.com/16136908/112727828-48671880-8f4a-11eb-99e5-5c7f8858fc16.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next time any new file is added, removed or modified and committed to github, github actions will take care of generating the TOC in the project README.&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>akatsuki06</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="github" />
+      
+        <category term="automation" />
+      
+
+      
+
+      
+        <summary type="html">Background Other than writing code, I have been using github for storing and organizing my daily notes. Github allows simplicity and flexibility to work with markdown notes, further it has the ability to version the files and view them across multiple devices. But as the total number of the file grows navigation becomes a bottleneck. To tackle this issue I am generating a table of content(TOC) in the README so that I can quickly access a file from the README itself. The other advantage it provides is I get a summary of all notes I have in the project. In this article, I am going to show you how to create a github actions workflow and make it generate the table of contents automatically for your project. Workflow Github Actions enables us to create workflows (like CI/CD capabilities) that can be integrated directly into our github code repository and runs on github hosted environments. These workflows are triggered automatically on occurrence of some event. I have all the code and files committed in this demo github repository toc-demo. This is how the file structure for the example project looks like. The github actions workflow is defined in a yaml file so we will create a file .github/workflows/action.yml. We will write a script that can generate the table of contents and then commit the changes and push! We will automate this workflow using the github actions. Workflow file name: toc-workflow-demo on: push: branches: [ main ] jobs: build: runs-on: ubuntu-latest steps: - name: checkout repo content uses: actions/checkout@v2 - name: setup python uses: actions/setup-python@v2 with: python-version: 3.8 - name: execute py script run: | python script.py - name: commit changes run: | git config user.name github-actions git config user.email github-actions@github.com echo `git add . &amp;amp;&amp;amp; git commit -m &quot;Auto generated commit&quot;` echo `git push` - name: Update Status run: | echo Updated Index successfully, echo Auto commit changes Summarizing the action file: the job is triggered when changes are pushed on to the main branch. the steps explained: the actions/checkout@v2 checks-out the repository toc-workflow-demo. the actions/setup-python@v2 setups python v3.8 in our actions environment. the job runs a script script.py to generate TOC and write to a file the end step is to commit the changes script made and push them to github. Script To generate TOC we require the name and path of all files. This python script reads through all files in the directory and generates a table of content in a tree hierarchy format. You can modify this script to create what fits you best. import os f=open('README.md','w+') f.write('# Notes') f.write('\n\n\n') startpath = './notes' for root, dirs, files in os.walk(startpath): if root is not startpath: level = root.replace(startpath, '').count(os.sep) -1 indent = ' ' * 2 * (level) f.write('{}- {}'.format(indent, os.path.basename(root))) f.write('\n') subindent = ' ' * 2 * (level + 1) for file in files: path = os.path.join(root,file) f.write(&quot;{}- [{}]({})&quot;.format(subindent,file[:-3],path)) f.write('\n') Conclusion Once all the code changes are committed and code is pushed to github. Github actions will run the jobs and auto-commit the table of content to project README. The following table of content has been generated by the github actions in the demo project. We can click on the file name to navigate to the file. Next time any new file is added, removed or modified and committed to github, github actions will take care of generating the TOC in the project README.</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry >
+      
+      <title type="html">SSL in a Spring Boot application</title>
+      
+      
+      <link href="https://akatsuki06.github.io/2020/10/26/ssl-in-spring-boot-application/" rel="alternate" type="text/html" title="SSL in a Spring Boot application" />
+      
+      <published>2020-10-26T09:40:56+00:00</published>
+      <updated>2020-10-26T09:40:56+00:00</updated>
+      <id>https://akatsuki06.github.io/2020/10/26/ssl-in-spring-boot-application</id>
+      <content type="html" xml:base="https://akatsuki06.github.io/2020/10/26/ssl-in-spring-boot-application/">&lt;p&gt;SSL (or its successor TLS) is a communication  protocol used to transfer encrypted data over a network. It involves  &lt;ins&gt;Authentication&lt;/ins&gt; of the entities and &lt;ins&gt;Encryption/Decryption&lt;/ins&gt;  of data being shared between a web server and client.&lt;/p&gt;
+
+&lt;p&gt;This article talks about SSL and how we can setup it on a spring boot application.&lt;/p&gt;
+
+&lt;h3&gt;&lt;strong&gt;Authentication&lt;/strong&gt;&lt;/h3&gt;
+
+&lt;p&gt;Authentication of entities on a network is established using digital certificate. Typically in a one way handshake, the server has a keystore which holds a private key, a public key and a &lt;em&gt;x509&lt;/em&gt;  certificate where the public and private keys form a pair, private key is used for decryption and public key is used for encryption of data.&lt;/p&gt;
+
+&lt;p&gt;There is a truststore which stores all trusted certificates signed by CA. Client/Server refers to it to validate a certificate.&lt;/p&gt;
+
+&lt;p&gt;When a client sends a request to server, the server responds back with the certificate and the public key.&lt;/p&gt;
+
+&lt;p&gt;Client authenticates the server by validating if the certificate received is present in truststore or not. In many cases the server would also validate its client that process is referred to as two way handshake.&lt;/p&gt;
+
+&lt;h3&gt;&lt;strong&gt;Encryption&lt;/strong&gt;&lt;/h3&gt;
+
+&lt;p&gt;Once the server is found authentic the client generates a shared key and encrypts it using server’s public key. It sends the encrypted shared key to the server where the server decrypts it using its private key. Now both server and client have a shared session key which can be used for encryption and decryption of data being transferred between them.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://user-images.githubusercontent.com/16136908/97805333-72f2c500-1c7b-11eb-83a3-49ce02376c9b.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;blockquote&gt;
+    &lt;p&gt;The server presents its public key and certificates from keystore to the client, the client validates the certificate is present in truststore so that the server can be trusted.&lt;/p&gt;
+  &lt;/blockquote&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2&gt;Setting up SSL in spring boot application&lt;/h2&gt;
+
+&lt;h3&gt;Generating the keystore and truststore&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;c&quot;&gt;# Generate a private key&lt;/span&gt;
+ openssl genrsa &lt;span class=&quot;nt&quot;&gt;-des3&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-out&lt;/span&gt; privatekey.key 1024
+
+&lt;span class=&quot;c&quot;&gt;# Generate Certificate signeding Request (CSR)&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# CN should be the domain-name or localhost for running in local&lt;/span&gt;
+openssl req &lt;span class=&quot;nt&quot;&gt;-new&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-key&lt;/span&gt; privatekey.key &lt;span class=&quot;nt&quot;&gt;-out&lt;/span&gt; csrfile.csr
+
+&lt;span class=&quot;c&quot;&gt;# Generate self signed certificate&lt;/span&gt;
+openssl x509 &lt;span class=&quot;nt&quot;&gt;-req&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-days&lt;/span&gt; 365 &lt;span class=&quot;nt&quot;&gt;-in&lt;/span&gt; csrfile.csr &lt;span class=&quot;nt&quot;&gt;-signkey&lt;/span&gt; privatekey.key &lt;span class=&quot;nt&quot;&gt;-out&lt;/span&gt; public.crt
+
+&lt;span class=&quot;c&quot;&gt;# Import the self signed certificate to a truststore file&lt;/span&gt;
+keytool &lt;span class=&quot;nt&quot;&gt;-import&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-file&lt;/span&gt; public.crt &lt;span class=&quot;nt&quot;&gt;-alias&lt;/span&gt; exampleCA &lt;span class=&quot;nt&quot;&gt;-keystore&lt;/span&gt; truststore.jks
+
+&lt;span class=&quot;c&quot;&gt;# Import the keypair and certificates to a keystore file&lt;/span&gt;
+openssl pkcs12 &lt;span class=&quot;nt&quot;&gt;-export&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-in&lt;/span&gt; public.crt &lt;span class=&quot;nt&quot;&gt;-inkey&lt;/span&gt; privatekey.key &lt;span class=&quot;nt&quot;&gt;-certfile&lt;/span&gt; public.crt &lt;span class=&quot;nt&quot;&gt;-name&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;certs&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-out&lt;/span&gt; keystore.p12
+
+&lt;span class=&quot;c&quot;&gt;# to convert p12 to jks&lt;/span&gt;
+keytool &lt;span class=&quot;nt&quot;&gt;-importkeystore&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-srckeystore&lt;/span&gt; keystore.p12 &lt;span class=&quot;nt&quot;&gt;-srcstoretype&lt;/span&gt; pkcs12 &lt;span class=&quot;nt&quot;&gt;-destkeystore&lt;/span&gt; keystore.jks &lt;span class=&quot;nt&quot;&gt;-deststoretype&lt;/span&gt; JKS
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2&gt;Configuring the server&lt;/h2&gt;
+
+&lt;p&gt;Once the certificates are generated copy the truststore and keystore .jks files to the classpath of your spring boot application.
+Here I am using spring &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2.3.4.RELEASE&lt;/code&gt;, spring-security dependency is required in the pom file.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.springframework.boot&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;spring-boot-starter-security&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WebSecurityConfig&lt;/code&gt; extending &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WebSecurityConfigurerAdapter&lt;/code&gt; class to allow request on https
+and block any request coming from a non-secure HTTP channel.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Configuration&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@EnableWebSecurity&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebSecurityConfig&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebSecurityConfigurerAdapter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;HttpSecurity&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requiresChannel&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;anyRequest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requiresSecure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Update the spring application yaml file as below.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;8443&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;ssl&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;key-store&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;classpath:keystore.jks&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;key-store-password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;password&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;trust-store&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;classpath:truststore.jks&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;trust-store-password&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;password&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;client-auth&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;need&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3&gt;Test it out&lt;/h3&gt;
+
+&lt;p&gt;Create one example controller:&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@RestController&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@RequestMapping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/ssl&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ExampleController&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;nd&quot;&gt;@RequestMapping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/example&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RequestMethod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;apiRequest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Successfully Validated!&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In the application tests, create a RestClient configuration which would access the server with ssl.
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SSLContextBuilder&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HttpClients&lt;/code&gt; are part of apache httpclients library.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;nd&quot;&gt;@Configuration&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RestClientTest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;password&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RestTemplate&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;restTemplate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;RestTemplateBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;SSLContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sslContext&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SSLContextBuilder&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;loadKeyMaterial&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ResourceUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getFile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;classpath:keystore.jks&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt;
+                                         &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toCharArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toCharArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;loadTrustMaterial&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ResourceUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getFile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;classpath:truststore.jks&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toCharArray&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;builder&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;requestFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;
+                        &lt;span class=&quot;o&quot;&gt;()-&amp;gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpComponentsClientHttpRequestFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;
+                                &lt;span class=&quot;nc&quot;&gt;HttpClients&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;custom&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setSSLContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sslContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                        &lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A sample junit test to test the endpoint. Note the host url should have &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https&lt;/code&gt; protocol or it will fail during SSL handshake.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@RunWith&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;SpringRunner&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@SpringBootTest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;classes&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Application&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;webEnvironment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SpringBootTest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;WebEnvironment&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;RANDOM_PORT&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ApplicationTests&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;ApplicationTests&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;nd&quot;&gt;@LocalServerPort&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;nd&quot;&gt;@Autowired&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RestTemplate&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;restTemplate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;nd&quot;&gt;@Test&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;withSSL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;restTemplate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getForObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://localhost:&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/ssl/example&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+      &lt;span class=&quot;nc&quot;&gt;Assert&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;assertEquals&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Successfully Validated!&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>akatsuki06</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="ssl" />
+      
+        <category term="security" />
+      
+        <category term="springboot" />
+      
+
+      
+
+      
+        <summary type="html">SSL (or its successor TLS) is a communication protocol used to transfer encrypted data over a network. It involves Authentication of the entities and Encryption/Decryption of data being shared between a web server and client. This article talks about SSL and how we can setup it on a spring boot application. Authentication Authentication of entities on a network is established using digital certificate. Typically in a one way handshake, the server has a keystore which holds a private key, a public key and a x509 certificate where the public and private keys form a pair, private key is used for decryption and public key is used for encryption of data. There is a truststore which stores all trusted certificates signed by CA. Client/Server refers to it to validate a certificate. When a client sends a request to server, the server responds back with the certificate and the public key. Client authenticates the server by validating if the certificate received is present in truststore or not. In many cases the server would also validate its client that process is referred to as two way handshake. Encryption Once the server is found authentic the client generates a shared key and encrypts it using server’s public key. It sends the encrypted shared key to the server where the server decrypts it using its private key. Now both server and client have a shared session key which can be used for encryption and decryption of data being transferred between them. The server presents its public key and certificates from keystore to the client, the client validates the certificate is present in truststore so that the server can be trusted. Setting up SSL in spring boot application Generating the keystore and truststore # Generate a private key openssl genrsa -des3 -out privatekey.key 1024 # Generate Certificate signeding Request (CSR) # CN should be the domain-name or localhost for running in local openssl req -new -key privatekey.key -out csrfile.csr # Generate self signed certificate openssl x509 -req -days 365 -in csrfile.csr -signkey privatekey.key -out public.crt # Import the self signed certificate to a truststore file keytool -import -file public.crt -alias exampleCA -keystore truststore.jks # Import the keypair and certificates to a keystore file openssl pkcs12 -export -in public.crt -inkey privatekey.key -certfile public.crt -name &quot;certs&quot; -out keystore.p12 # to convert p12 to jks keytool -importkeystore -srckeystore keystore.p12 -srcstoretype pkcs12 -destkeystore keystore.jks -deststoretype JKS Configuring the server Once the certificates are generated copy the truststore and keystore .jks files to the classpath of your spring boot application. Here I am using spring 2.3.4.RELEASE, spring-security dependency is required in the pom file. &amp;lt;dependency&amp;gt; &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt; &amp;lt;artifactId&amp;gt;spring-boot-starter-security&amp;lt;/artifactId&amp;gt; &amp;lt;/dependency&amp;gt; Add a WebSecurityConfig extending WebSecurityConfigurerAdapter class to allow request on https and block any request coming from a non-secure HTTP channel. @Configuration @EnableWebSecurity public class WebSecurityConfig extends WebSecurityConfigurerAdapter { @Override protected void configure(HttpSecurity http) throws Exception { http.requiresChannel() .anyRequest() .requiresSecure(); } } Update the spring application yaml file as below. server: port: 8443 ssl: enabled: true key-store: classpath:keystore.jks key-store-password: password trust-store: classpath:truststore.jks trust-store-password: password client-auth: need Test it out Create one example controller: @RestController @RequestMapping(&quot;/ssl&quot;) public class ExampleController { @RequestMapping(path=&quot;/example&quot;, method= RequestMethod.GET) public String apiRequest() { return &quot;Successfully Validated!&quot;; } } In the application tests, create a RestClient configuration which would access the server with ssl. SSLContextBuilder and HttpClients are part of apache httpclients library. @Configuration public class RestClientTest { private String password = &quot;password&quot;; @Bean public RestTemplate restTemplate(RestTemplateBuilder builder) throws Exception { SSLContext sslContext = SSLContextBuilder .create() .loadKeyMaterial(ResourceUtils.getFile(&quot;classpath:keystore.jks&quot;), password.toCharArray(), password.toCharArray()) .loadTrustMaterial(ResourceUtils.getFile(&quot;classpath:truststore.jks&quot;), password.toCharArray()) .build(); return builder .requestFactory( ()-&amp;gt;new HttpComponentsClientHttpRequestFactory( HttpClients.custom() .setSSLContext(sslContext) .build() ) ) .build(); } } A sample junit test to test the endpoint. Note the host url should have https protocol or it will fail during SSL handshake. @RunWith(SpringRunner.class) @SpringBootTest( classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT ) public class ApplicationTests { public ApplicationTests(){ } @LocalServerPort private int port; @Autowired private RestTemplate restTemplate; @Test public void withSSL() { String response = restTemplate.getForObject(&quot;https://localhost:&quot; + port + &quot;/ssl/example&quot;, String.class); Assert.assertEquals(&quot;Successfully Validated!&quot;, response); } }</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry >
+      
+      <title type="html">Handling failures in Kafka streams</title>
+      
+      
+      <link href="https://akatsuki06.github.io/2020/08/30/handling-failures-in-kafka-stream/" rel="alternate" type="text/html" title="Handling failures in Kafka streams" />
+      
+      <published>2020-08-30T06:10:56+00:00</published>
+      <updated>2020-08-30T06:10:56+00:00</updated>
+      <id>https://akatsuki06.github.io/2020/08/30/handling-failures-in-kafka-stream</id>
+      <content type="html" xml:base="https://akatsuki06.github.io/2020/08/30/handling-failures-in-kafka-stream/">&lt;p&gt;For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. 
+Occurrence of failures can halt the stream and can cause serious disruption in the service.&lt;/p&gt;
+
+&lt;p&gt;Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application.&lt;/p&gt;
+
+&lt;p&gt;This article talks about various kind of exception occurring in kafka stream and how to handle them.&lt;/p&gt;
+
+&lt;h3&gt;Exceptions within the code&lt;/h3&gt;
+
+&lt;p&gt;Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+    &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;db&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getUser&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; 
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;  
+&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ReadTimeoutException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;  
+  &lt;span class=&quot;c1&quot;&gt;//handle, retry, notify..&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3&gt;Deserialization exception&lt;/h3&gt;
+
+&lt;p&gt;These exception are thrown by kafka and can not be handled by a try-catch in our code.
+The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer.
+To handle such failures kafka provides &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DeserializationExceptionHandler&lt;/code&gt;. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CustomDeserializationExceptionHandler&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeserializationExceptionHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+  
+  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;  
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeserializationHandlerResponse&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ProcessorContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConsumerRecord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;byte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[],&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;byte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;record&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; 
+  									&lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+        &lt;span class=&quot;c1&quot;&gt;//logic to deal with the corrupt record  &lt;/span&gt;
+  	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeserializationHandlerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;CONTINUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;  
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;  
+  
+  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;  
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+        &lt;span class=&quot;c1&quot;&gt;//can read any property set in the stream here  &lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;  
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// in the streams config&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;streamConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;default.deserialization.exception.handler&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CustomDeserializationExceptionHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3&gt;Production exceptions&lt;/h3&gt;
+
+&lt;p&gt;Any exception that occur during kafka broker and client interaction is a production exception. An example is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RecordTooLargeException&lt;/code&gt;.
+If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;max.message.bytes&lt;/code&gt;), it will throw a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RecordTooLargeException&lt;/code&gt;. We can handle the exception using a custom &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ProductionExceptionHandler&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CustomProductionExceptionHandler&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ProductionExceptionHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;  
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ProductionExceptionHandlerResponse&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;handle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ProducerRecord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;byte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[],&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;byte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;record&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+  								 &lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+          
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;instanceof&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RecordTooLargeException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;){&lt;/span&gt;  
+            &lt;span class=&quot;c1&quot;&gt;// code to deal with large record..  &lt;/span&gt;
+ 		 &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ProductionExceptionHandlerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;CONTINUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;  
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;  
+          &lt;span class=&quot;c1&quot;&gt;//other conditional checks&lt;/span&gt;
+          
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ProductionExceptionHandlerResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;FAIL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;  
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;  
+  
+  &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;  
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;  
+  
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;  
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//in the streams config&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;streamConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;default.production.exception.handler&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CustomProductionExceptionHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3&gt;Uncaught exceptions&lt;/h3&gt;
+
+&lt;p&gt;In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setUncaughtExceptionHandler&lt;/code&gt; method provides a way to trigger some code on termination.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;kafkaStreams&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setUncaughtExceptionHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;thread&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//code to be triggered&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;References:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://kafka.apache.org/&quot;&gt;Apache Kafka&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.confluent.io/current/index.html&quot;&gt;Confluent docs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>akatsuki06</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="kafka" />
+      
+        <category term="stream" />
+      
+        <category term="microservice" />
+      
+
+      
+
+      
+        <summary type="html">For a Kafka stream to be stable, resilient and reliable it is important that it handle failures gracefully. Occurrence of failures can halt the stream and can cause serious disruption in the service. Even if exceptions occurring within the code are handled there is a fair possibility of stream failure due to inconsistency in schema or due to failure on client-broker interaction, which can lead to unexpected shutdown of the application. This article talks about various kind of exception occurring in kafka stream and how to handle them. Exceptions within the code Exceptions which are thrown by the processor code such as arithmetic exceptions, parsing exceptions, or timeout exception on database call. These can be handled by simply putting a try-catch block around the piece of code which throws the exception. try { user = db.getUser(id) } catch (ReadTimeoutException e){ //handle, retry, notify.. } Deserialization exception These exception are thrown by kafka and can not be handled by a try-catch in our code. The data present in a kafka topic may have a different schema then what the stream consumer expects. This throws a deserialization exception when consumed by the consumer. To handle such failures kafka provides DeserializationExceptionHandler. As these failures occur due to inconsistent data in topic, they can be simply logged and the stream can continue without failing. public class CustomDeserializationExceptionHandler implements DeserializationExceptionHandler { @Override public DeserializationHandlerResponse handle(ProcessorContext context, ConsumerRecord&amp;lt;byte[], byte[]&amp;gt; record, Exception exception) { //logic to deal with the corrupt record return DeserializationHandlerResponse.CONTINUE; } @Override public void configure(Map&amp;lt;String, ?&amp;gt; map) { //can read any property set in the stream here } } // in the streams config streamConfig.put(&quot;default.deserialization.exception.handler&quot;, CustomDeserializationExceptionHandler.class); Production exceptions Any exception that occur during kafka broker and client interaction is a production exception. An example is RecordTooLargeException. If the kafka stream writes a record to a topic but the record size exceeds the largest message size allowed by the broker(max.message.bytes), it will throw a RecordTooLargeException. We can handle the exception using a custom ProductionExceptionHandler. public class CustomProductionExceptionHandler implements ProductionExceptionHandler { @Override public ProductionExceptionHandlerResponse handle(ProducerRecord&amp;lt;byte[], byte[]&amp;gt; record, Exception exception) { if (exception instanceof RecordTooLargeException){ // code to deal with large record.. return ProductionExceptionHandlerResponse.CONTINUE; } //other conditional checks return ProductionExceptionHandlerResponse.FAIL; } @Override public void configure(Map&amp;lt;String, ?&amp;gt; map) { } } //in the streams config streamConfig.put(&quot;default.production.exception.handler&quot;, CustomProductionExceptionHandler.class); Uncaught exceptions In case any uncaught exception occurs in a stream thread and the thread abruptly terminates. The setUncaughtExceptionHandler method provides a way to trigger some code on termination. kafkaStreams.setUncaughtExceptionHandler((thread,exception) -&amp;gt;{ //code to be triggered }); References: Apache Kafka Confluent docs</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+</feed>
